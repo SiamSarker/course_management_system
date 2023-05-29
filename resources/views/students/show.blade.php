@@ -1,13 +1,23 @@
 @extends('layout')
 
 @section('content')
-    <div class="container mt-5">
-        <h2>{{ $student->name }}</h2>
-        <a href="{{ route('students.edit', $student) }}" class="btn btn-secondary">Edit</a>
-        <form action="{{ route('students.destroy', $student) }}" method="POST" class="d-inline">
+    <div class="container">
+        <h1>Student Details</h1>
+
+        <h3>Name: {{ $student->name }}</h3>
+
+        <h3>Enrolled Courses:</h3>
+        <ul>
+            @foreach ($student->courses as $course)
+                <li>{{ $course->name }}</li>
+            @endforeach
+        </ul>
+
+        <a href="{{ route('students.edit', $student->id) }}" class="btn btn-primary">Edit</a>
+        <form action="{{ route('students.destroy', $student->id) }}" method="POST" style="display: inline-block;">
             @csrf
             @method('DELETE')
-            <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this student?')">Delete</button>
+            <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
         </form>
     </div>
 @endsection

@@ -8,13 +8,15 @@ class Course extends Model
 {
     protected $fillable = ['name', 'description', 'duration'];
 
-    public function teacher()
-    {
-        return $this->belongsTo(Teacher::class);
-    }
-
     public function students()
     {
-        return $this->belongsToMany(Student::class);
+        return $this->belongsToMany(Student::class, 'student_course', 'course_id', 'student_id');
     }
+
+
+//    public function teacher()
+//    {
+//        return $this->belongsTo(Teacher::class);
+//    }
+
 }

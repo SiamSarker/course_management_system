@@ -4,6 +4,7 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\TeacherController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\StudentController;
+use \App\Http\Controllers\StudentCourseController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,6 +20,9 @@ use App\Http\Controllers\StudentController;
 Route::get('/', function () {
     return view('welcome');
 });
+
+
+Route::get('data', [StudentCourseController::class, 'index']);
 
 // Teacher routes
 
