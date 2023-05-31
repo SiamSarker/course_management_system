@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\TeacherController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\StudentController;
 use \App\Http\Controllers\StudentCourseController;
@@ -23,6 +24,23 @@ Route::get('/', function () {
 
 
 Route::get('data', [StudentCourseController::class, 'index']);
+
+
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Route::prefix('students')->middleware(['auth', 'isAdmin'])->group(function() {
+    Route::get('/', [StudentController::class, 'index'])->name('students.index');
+    Route::get('/create', [StudentController::class, 'create'])->name('students.create');
+    Route::post('/', [StudentController::class, 'store'])->name('students.store');
+    Route::get('/{student}', [StudentController::class, 'show'])->name('students.show');
+    Route::get('/{student}/edit', [StudentController::class, 'edit'])->name('students.edit');
+    Route::put('/{student}', [StudentController::class, 'update'])->name('students.update');
+    Route::delete('/{student}', [StudentController::class, 'destroy'])->name('students.destroy');
+});
+
+Route::get('/students2', [StudentController::class, 'index2'])->name('students');
 
 // Teacher routes
 
@@ -46,13 +64,9 @@ Route::delete('/courses/{course}', [CourseController::class, 'destroy'])->name('
 
 //student routes
 
-Route::get('/students', [StudentController::class, 'index'])->name('students.index');
-Route::get('/students/create', [StudentController::class, 'create'])->name('students.create');
-Route::post('/students', [StudentController::class, 'store'])->name('students.store');
-Route::get('/students/{student}', [StudentController::class, 'show'])->name('students.show');
-Route::get('/students/{student}/edit', [StudentController::class, 'edit'])->name('students.edit');
-Route::put('/students/{student}', [StudentController::class, 'update'])->name('students.update');
-Route::delete('/students/{student}', [StudentController::class, 'destroy'])->name('students.destroy');
+
+
+
 
 
 

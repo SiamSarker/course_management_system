@@ -13,6 +13,12 @@ class StudentController extends Controller
         return view('students.index', compact('students'));
     }
 
+    public function index2()
+    {
+        $students = Student::all();
+        return view('students2', compact('students'));
+    }
+
     public function create()
     {
         $courses = Course::all();
