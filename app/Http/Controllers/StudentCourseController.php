@@ -25,4 +25,14 @@ class StudentCourseController extends Controller
             echo "<br>";
         }
     }
+
+    public function test()
+    {
+        $response = [
+            'user' => "Hello From",
+            'token' => "StudentCourse controller"
+        ];
+
+        return response($response, 202);
+    }
 }
