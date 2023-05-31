@@ -10,8 +10,10 @@ class Course extends Model
 
     public function students()
     {
-        return $this->belongsToMany(Student::class, 'student_course', 'course_id', 'student_id');
+        return $this->belongsToMany(User::class);
     }
+
+
 
 
 //    public function teacher()

@@ -76,8 +76,25 @@
         </nav>
 
         <main class="py-4">
-            @yield('content')
+            <div class="container">
+                <!-- Flash messages -->
+                @if(Session::has('success'))
+                    <div class="alert alert-success">
+                        {{ Session::get('success') }}
+                    </div>
+                @endif
+
+                @if(Session::has('error'))
+                    <div class="alert alert-danger">
+                        {{ Session::get('error') }}
+                    </div>
+                @endif
+
+                <!-- Content section -->
+                @yield('content')
+            </div>
         </main>
+
     </div>
 </body>
 </html>

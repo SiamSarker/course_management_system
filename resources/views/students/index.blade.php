@@ -10,6 +10,7 @@
             <thead>
             <tr>
                 <th>Name</th>
+                <th>Email</th>
                 <th>Enrolled Courses</th>
                 <th>Actions</th>
             </tr>
@@ -18,6 +19,7 @@
             @foreach ($students as $student)
                 <tr>
                     <td>{{ $student->name }}</td>
+                    <td>{{ $student->email }}</td>
                     <td>
                         <ul>
                             @foreach ($student->courses as $course)

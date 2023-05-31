@@ -3,21 +3,58 @@ namespace App\Http\Controllers;
 
 use App\Models\Student;
 use App\Models\Course;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Session;
 
 class StudentController extends Controller
 {
     public function index()
     {
-        $students = Student::all();
+        $students = User::where('role', 0)->get(); // Retrieve only students
+
         return view('students.index', compact('students'));
     }
 
     public function index2()
     {
-        $students = Student::all();
+        $students = User::where('role', 0)->get();
         return view('students2', compact('students'));
     }
+
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required|email|unique:users',
+            'password' => 'required',
+            'courses' => 'required|array',
+            'courses.*' => 'exists:courses,id',
+        ]);
+
+        // Check if email already exists
+        $existingUser = User::where('email', $request->email)->first();
+        if ($existingUser) {
+            return redirect()->back()->with('error', 'The email already exists.');
+        }
+
+        // Create new user
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 0,
+        ]);
+
+        // Attach courses to the user
+        $user->courses()->attach($request->courses);
+
+        return redirect()->route('students.index')->with('success', 'Student created successfully.');
+    }
+
+
 
     public function create()
     {
@@ -25,61 +62,58 @@ class StudentController extends Controller
         return view('students.create', compact('courses'));
     }
 
-    public function store(Request $request)
-    {
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'course_id' => 'required|exists:courses,id',
-        ]);
-
-        $student = new Student();
-        $student->name = $validatedData['name'];
-        $student->save();
-
-        $courseId = $validatedData['course_id'];
-        $student->courses()->attach($courseId);
-
-        return redirect()->route('students.index')->with('success', 'Student created successfully.');
-    }
-
     public function edit($id)
     {
-        $student = Student::findOrFail($id);
-        $availableCourses = Course::whereNotIn('id', $student->courses->pluck('id'))->get();
+        $student = User::where('role', 0)->findOrFail($id);
+        $courses = Course::all();
 
-        return view('students.edit', compact('student', 'availableCourses'));
+        return view('students.edit', compact('student', 'courses'));
     }
 
-//    public function create()
+//    public function checkEmail(Request $request)
 //    {
-//        return view('students.create');
-//    }
+//        $email = $request->input('email');
 //
-//    public function store(Request $request)
-//    {
-//        $student = Student::create($request->all());
-//        return redirect()->route('students.index')->with('success', 'Student created successfully!');
+//        $user = User::where('email', $email)->first();
+//
+//        if ($user) {
+//            return response()->json(['exists' => true]);
+//        }
+//
+//        return response()->json(['exists' => false]);
 //    }
 
-    public function show(Student $student)
+    public function update(Request $request, $id)
     {
-        return view('students.show', compact('student'));
+        $student = User::where('role', 0)->findOrFail($id);
+
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required|email|unique:users,email,' . $student->id,
+            'courses' => 'nullable|array',
+            'courses.*' => 'exists:courses,id',
+        ]);
+
+        $student->name = $request->name;
+        $student->email = $request->email;
+        $student->courses()->sync($request->courses);
+
+        $student->save();
+
+        return redirect()->route('students.index')->with('success', 'Student updated successfully.');
     }
 
-//    public function edit(Student $student)
-//    {
-//        return view('students.edit', compact('student'));
-//    }
-
-    public function update(Request $request, Student $student)
+    public function show($id)
     {
-        $student->update($request->all());
-        return redirect()->route('students.index')->with('success', 'Student updated successfully!');
+        $user = User::where('id', $id)->where('role', 0)->firstOrFail();
+        return view('students.show', compact('user'));
     }
 
-    public function destroy(Student $student)
+    public function destroy($id)
     {
-        $student->delete();
-        return redirect()->route('students.index')->with('success', 'Student deleted successfully!');
+        $user = User::where('id', $id)->where('role', 0)->firstOrFail();
+        $user->courses()->detach(); // Remove the student from all courses
+        $user->delete(); // Delete the student
+        return redirect()->route('students.index')->with('success', 'Student deleted successfully');
     }
 }

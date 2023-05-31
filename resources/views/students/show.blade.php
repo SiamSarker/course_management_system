@@ -1,23 +1,16 @@
-@extends('layout')
+@extends('layouts.app')
 
 @section('content')
     <div class="container">
-        <h1>Student Details</h1>
-
-        <h3>Name: {{ $student->name }}</h3>
-
-        <h3>Enrolled Courses:</h3>
+        <h1>View Student</h1>
+        <p><strong>Name:</strong> {{ $user->name }}</p>
+        <p><strong>Email:</strong> {{ $user->email }}</p>
+        <p><strong>Enrolled Courses:</strong></p>
         <ul>
-            @foreach ($student->courses as $course)
+            @foreach ($user->courses as $course)
                 <li>{{ $course->name }}</li>
             @endforeach
         </ul>
-
-        <a href="{{ route('students.edit', $student->id) }}" class="btn btn-primary">Edit</a>
-        <form action="{{ route('students.destroy', $student->id) }}" method="POST" style="display: inline-block;">
-            @csrf
-            @method('DELETE')
-            <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
-        </form>
+        <a href="{{ route('students.index') }}" class="btn btn-primary">Back</a>
     </div>
 @endsection
