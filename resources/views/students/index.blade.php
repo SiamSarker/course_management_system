@@ -17,7 +17,12 @@
             </tr>
             </thead>
             <tbody>
-            @foreach ($students as $student)
+            @php
+                $sortedStudents = $students->sortBy(function ($student) {
+                    return optional($student->student)->rank;
+                });
+            @endphp
+            @foreach ($sortedStudents as $student)
                 <tr>
                     <td>{{ $student->name }}</td>
                     <td>{{ $student->email }}</td>
@@ -28,7 +33,14 @@
                             @endforeach
                         </ul>
                     </td>
-                    <td>{{ optional($student->student)->rank }}</td>
+                    <td>
+                        <form action="{{ route('students.updateRank', $student->student->id) }}" method="POST">
+                            @csrf
+                            @method('PUT')
+                            <input type="number" name="rank" value="{{ optional($student->student)->rank }}" class="form-control" />
+                            <button type="submit" class="btn btn-primary">Update</button>
+                        </form>
+                    </td>
                     <td>
                         <a href="{{ route('students.show', $student->id) }}" class="btn btn-info">View</a>
                         <a href="{{ route('students.edit', $student->id) }}" class="btn btn-primary">Edit</a>

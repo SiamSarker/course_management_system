@@ -5,6 +5,7 @@ use App\Models\Student;
 use App\Models\Course;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 
@@ -12,7 +13,18 @@ class StudentController extends Controller
 {
     public function index()
     {
-        $students = User::where('role', 0)->with('student')->get(); // Retrieve only students
+        $students = User::where('role', 0)->with(['student' => function ($query) {
+            $query->orderBy('students.rank', 'asc');
+        }])->get();
+
+//        $students = DB::table("users")->join("students", "users.id", "=", "students.user_id")
+//            ->join("courses", "users.id", "=", "courses.user_id")
+//            ->orderBy('rank', 'asc')->get();
+//dd($students);
+
+
+
+        // Retrieve only students
 //        dd($students);
 
 //        foreach ($students as $student) {
@@ -27,6 +39,19 @@ class StudentController extends Controller
 //        return view('students.index', compact('students'));
         return view('students.index')->with('students', $students);
 
+    }
+
+    public function updateRank(Request $request, Student $student)
+    {
+        $request->validate([
+            'rank' => 'required|integer',
+        ]);
+
+        $student->update([
+            'rank' => $request->rank,
+        ]);
+
+        return redirect()->route('students.index')->with('success', 'Rank updated successfully.');
     }
 
     public function index2()
@@ -60,9 +85,11 @@ class StudentController extends Controller
             'role' => 0,
         ]);
 
+        $existingStudentCount = Student::count();
+
         // Create new student with rank 0
         $student = new Student([
-            'rank' => 0,
+            'rank' => $existingStudentCount + 1,
         ]);
 
         // Save the student record and associate it with the user

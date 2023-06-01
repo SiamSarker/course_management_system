@@ -42,7 +42,13 @@ Route::prefix('students')->middleware(['auth', 'isAdmin'])->group(function() {
     Route::get('/{student}/edit', [StudentController::class, 'edit'])->name('students.edit');
     Route::put('/{student}', [StudentController::class, 'update'])->name('students.update');
     Route::delete('/{student}', [StudentController::class, 'destroy'])->name('students.destroy');
+//    Route::put('/{student}/update-rank', [StudentController::class, 'updateRank'])->name('students.updateRank');
 });
+
+Route::put('/students/{student}/update-rank', [StudentController::class, 'updateRank'])->name('students.updateRank');
+
+
+
 
 
 Route::get('/students2', [StudentController::class, 'index2'])->name('students');
