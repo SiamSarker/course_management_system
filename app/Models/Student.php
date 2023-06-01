@@ -13,8 +13,10 @@ class Student extends Model
         return $this->belongsToMany(Course::class, 'student_course', 'student_id', 'course_id');
     }
 
-
-
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
 }
 

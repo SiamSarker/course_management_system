@@ -12,6 +12,7 @@
                 <th>Name</th>
                 <th>Email</th>
                 <th>Enrolled Courses</th>
+                <th>Rank</th>
                 <th>Actions</th>
             </tr>
             </thead>
@@ -27,6 +28,7 @@
                             @endforeach
                         </ul>
                     </td>
+                    <td>{{ optional($student->student)->rank }}</td>
                     <td>
                         <a href="{{ route('students.show', $student->id) }}" class="btn btn-info">View</a>
                         <a href="{{ route('students.edit', $student->id) }}" class="btn btn-primary">Edit</a>

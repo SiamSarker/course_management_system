@@ -12,9 +12,21 @@ class StudentController extends Controller
 {
     public function index()
     {
-        $students = User::where('role', 0)->get(); // Retrieve only students
+        $students = User::where('role', 0)->with('student')->get(); // Retrieve only students
+//        dd($students);
 
-        return view('students.index', compact('students'));
+//        foreach ($students as $student) {
+//            $user = $student; // User details
+//            $student = $student->student; // Student details
+//            dd($user, $student);
+//
+//            // Perform any desired operations with $user and $student
+//        }
+
+
+//        return view('students.index', compact('students'));
+        return view('students.index')->with('students', $students);
+
     }
 
     public function index2()
@@ -48,6 +60,17 @@ class StudentController extends Controller
             'role' => 0,
         ]);
 
+        // Create new student with rank 0
+        $student = new Student([
+            'rank' => 0,
+        ]);
+
+        // Save the student record and associate it with the user
+        $user->student()->save($student);
+
+        // Attach courses to the student
+        $student->courses()->attach($request->courses);
+
         // Attach courses to the user
         $user->courses()->attach($request->courses);
 
@@ -72,20 +95,32 @@ class StudentController extends Controller
 
     public function update(Request $request, $id)
     {
-        $student = User::where('role', 0)->findOrFail($id);
+        $user = User::where('role', 0)->findOrFail($id);
 
         $request->validate([
             'name' => 'required',
-            'email' => 'required|email|unique:users,email,' . $student->id,
+            'email' => 'required|email|unique:users,email,' . $user->id,
             'courses' => 'nullable|array',
             'courses.*' => 'exists:courses,id',
         ]);
 
-        $student->name = $request->name;
-        $student->email = $request->email;
-        $student->courses()->sync($request->courses);
+        $user->name = $request->name;
+        $user->email = $request->email;
 
-        $student->save();
+                // Create new student with rank 0
+        $student = new Student([
+            'rank' => 0,
+        ]);
+
+        // Save the student record and associate it with the user
+        $user->student()->save($student);
+
+        // Attach courses to the student
+        $student->courses()->attach($request->courses);
+
+        $user->courses()->sync($request->courses);
+
+        $user->save();
 
         return redirect()->route('students.index')->with('success', 'Student updated successfully.');
     }
@@ -99,7 +134,11 @@ class StudentController extends Controller
     public function destroy($id)
     {
         $user = User::where('id', $id)->where('role', 0)->firstOrFail();
-        $user->courses()->detach(); // Remove the student from all courses
+
+        $user->student->courses()->detach(); // Remove the student from all courses
+        $user->courses()->detach(); // Remove the users from all courses
+
+        $user->student()->delete();
         $user->delete(); // Delete the student
         return redirect()->route('students.index')->with('success', 'Student deleted successfully');
     }
