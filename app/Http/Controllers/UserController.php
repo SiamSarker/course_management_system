@@ -9,6 +9,20 @@ use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
     //
+    public function checkEmail(Request $request)
+    {
+        $email = $request->input('email');
+
+        $user = User::where('email', $email)->first();
+
+        if ($user) {
+            // Email already exists
+            return response()->json(['exists' => true]);
+        } else {
+            // Email is available
+            return response()->json(['exists' => false]);
+        }
+    }
 
     function index(Request $request)
     {

@@ -5,6 +5,7 @@ window.jQuery = $;
 window.$ = $;
 import 'bootstrap';
 
-$(document).ready(function() {
-    $('.dropdown-toggle').dropdown();
+var $jq = jQuery.noConflict();
+$jq(document).ready(function(){
+    $jq('.dropdown').dropdown();
 });

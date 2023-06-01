@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\TeacherController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\StudentController;
@@ -29,6 +30,10 @@ Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
+
+Route::post('/check-email', [UserController::class, 'checkEmail'])->name('checkEmail');
+
+
 Route::prefix('students')->middleware(['auth', 'isAdmin'])->group(function() {
     Route::get('/', [StudentController::class, 'index'])->name('students.index');
     Route::get('/create', [StudentController::class, 'create'])->name('students.create');
@@ -37,11 +42,7 @@ Route::prefix('students')->middleware(['auth', 'isAdmin'])->group(function() {
     Route::get('/{student}/edit', [StudentController::class, 'edit'])->name('students.edit');
     Route::put('/{student}', [StudentController::class, 'update'])->name('students.update');
     Route::delete('/{student}', [StudentController::class, 'destroy'])->name('students.destroy');
-
 });
-
-
-//Route::post('/check-email', [StudentController::class, 'checkEmail'])->name('check-email');
 
 
 Route::get('/students2', [StudentController::class, 'index2'])->name('students');

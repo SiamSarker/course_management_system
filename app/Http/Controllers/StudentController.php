@@ -70,19 +70,6 @@ class StudentController extends Controller
         return view('students.edit', compact('student', 'courses'));
     }
 
-//    public function checkEmail(Request $request)
-//    {
-//        $email = $request->input('email');
-//
-//        $user = User::where('email', $email)->first();
-//
-//        if ($user) {
-//            return response()->json(['exists' => true]);
-//        }
-//
-//        return response()->json(['exists' => false]);
-//    }
-
     public function update(Request $request, $id)
     {
         $student = User::where('role', 0)->findOrFail($id);
