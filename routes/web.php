@@ -47,8 +47,7 @@ Route::prefix('students')->middleware(['auth', 'isAdmin'])->group(function() {
 
 Route::put('/students/{student}/update-rank', [StudentController::class, 'updateRank'])->name('students.updateRank');
 
-
-
+Route::get('students/table-data', [StudentController::class, 'getTableData'])->name('students.tableData');
 
 
 Route::get('/students2', [StudentController::class, 'index2'])->name('students');

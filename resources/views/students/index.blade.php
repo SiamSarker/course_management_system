@@ -34,12 +34,7 @@
                         </ul>
                     </td>
                     <td>
-                        <form action="{{ route('students.updateRank', $student->student->id) }}" method="POST">
-                            @csrf
-                            @method('PUT')
-                            <input type="number" name="rank" value="{{ optional($student->student)->rank }}" class="form-control" />
-                            <button type="submit" class="btn btn-primary">Update</button>
-                        </form>
+                        <input type="number" name="rank" value="{{ optional($student->student)->rank }}" class="form-control rank-input" data-student-id="{{ $student->student->id }}" />
                     </td>
                     <td>
                         <a href="{{ route('students.show', $student->id) }}" class="btn btn-info">View</a>
@@ -55,4 +50,28 @@
             </tbody>
         </table>
     </div>
+@endsection
+
+@section('scripts')
+    <script>
+        $('.rank-input').on('input', function () {
+            var rank = $(this).val();
+            var studentId = $(this).data('student-id');
+
+            $.ajax({
+                url: "/students/" + studentId + "/update-rank",
+                method: 'PUT',
+                data: {
+                    rank: rank,
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function (response) {
+                    // Handle success response if needed
+                },
+                error: function (xhr, status, error) {
+                    // Handle error response if needed
+                }
+            });
+        });
+    </script>
 @endsection

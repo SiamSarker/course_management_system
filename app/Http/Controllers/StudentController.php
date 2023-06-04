@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\Student;
 use App\Models\Course;
 use App\Models\User;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -17,29 +18,19 @@ class StudentController extends Controller
             $query->orderBy('students.rank', 'asc');
         }])->get();
 
-//        $students = DB::table("users")->join("students", "users.id", "=", "students.user_id")
-//            ->join("courses", "users.id", "=", "courses.user_id")
-//            ->orderBy('rank', 'asc')->get();
-//dd($students);
-
-
-
-        // Retrieve only students
-//        dd($students);
-
-//        foreach ($students as $student) {
-//            $user = $student; // User details
-//            $student = $student->student; // Student details
-//            dd($user, $student);
-//
-//            // Perform any desired operations with $user and $student
-//        }
-
-
-//        return view('students.index', compact('students'));
         return view('students.index')->with('students', $students);
 
     }
+
+    public function getTableData()
+    {
+        $students = User::where('role', 0)->with(['student' => function ($query) {
+            $query->orderBy('students.rank', 'asc');
+        }])->get();
+
+        return view('students.table', compact('students'));
+    }
+
 
     public function updateRank(Request $request, Student $student)
     {
@@ -51,7 +42,16 @@ class StudentController extends Controller
             'rank' => $request->rank,
         ]);
 
-        return redirect()->route('students.index')->with('success', 'Rank updated successfully.');
+        $sortedStudents = User::where('role', 0)->with(['student' => function ($query) {
+            $query->orderBy('students.rank', 'asc');
+        }])->get();
+
+        $view = view('students.table', compact('sortedStudents'))->render();
+
+        return Response::json([
+            'success' => true,
+            'html' => $view,
+        ]);
     }
 
     public function index2()
