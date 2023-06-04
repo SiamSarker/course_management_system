@@ -32,27 +32,38 @@ class StudentController extends Controller
     }
 
 
+
     public function updateRank(Request $request, Student $student)
     {
-        $request->validate([
-            'rank' => 'required|integer',
-        ]);
+        $newRank = $request->rank;
 
-        $student->update([
-            'rank' => $request->rank,
-        ]);
 
-        $sortedStudents = User::where('role', 0)->with(['student' => function ($query) {
-            $query->orderBy('students.rank', 'asc');
-        }])->get();
+        $targetStudent = Student::where('rank', $newRank)->first();
 
-        $view = view('students.table', compact('sortedStudents'))->render();
 
-        return Response::json([
+        if ($targetStudent) {
+            $currentRank = $student->rank;
+
+
+            if ($currentRank < $newRank) {
+                Student::whereBetween('rank', [$currentRank + 1, $newRank])->decrement('rank');
+            } else {
+                Student::whereBetween('rank', [$newRank, $currentRank - 1])->increment('rank');
+            }
+
+            $student->update([
+                'rank' => $newRank,
+            ]);
+        }
+
+        return response()->json([
             'success' => true,
-            'html' => $view,
         ]);
     }
+
+
+
+
 
     public function index2()
     {

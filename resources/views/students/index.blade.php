@@ -54,9 +54,11 @@
 
 @section('scripts')
     <script>
-        $('.rank-input').on('input', function () {
+        $('.rank-input').on('change', function () {
             var rank = $(this).val();
             var studentId = $(this).data('student-id');
+
+            console.log(rank, studentId);
 
             $.ajax({
                 url: "/students/" + studentId + "/update-rank",
@@ -67,9 +69,12 @@
                 },
                 success: function (response) {
                     // Handle success response if needed
+                    console.log("success");
+                    location.reload();
                 },
                 error: function (xhr, status, error) {
                     // Handle error response if needed
+                    console.log("Error and error");
                 }
             });
         });
