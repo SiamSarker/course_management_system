@@ -37,29 +37,47 @@ class StudentController extends Controller
     {
         $newRank = $request->rank;
 
-
-        $targetStudent = Student::where('rank', $newRank)->first();
-
-
-        if ($targetStudent) {
-            $currentRank = $student->rank;
-
-
-            if ($currentRank < $newRank) {
-                Student::whereBetween('rank', [$currentRank + 1, $newRank])->decrement('rank');
-            } else {
-                Student::whereBetween('rank', [$newRank, $currentRank - 1])->increment('rank');
-            }
-
-            $student->update([
-                'rank' => $newRank,
+        // Return an error if the new rank is not a positive integer
+        if ($newRank < 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Rank should be a positive integer',
             ]);
+        }
+
+        $currentRank = $student->rank;
+
+        if ($newRank != $currentRank) {
+            $targetStudent = Student::where('rank', $newRank)->first();
+
+            if (!$targetStudent) {
+                $student->update(['rank' => $newRank]);
+            } else {
+                // Increment ranks if the new rank is higher than the current rank
+                if ($newRank > $currentRank) {
+                    Student::where('rank', '>', $currentRank)
+                        ->where('rank', '<=', $newRank)
+                        ->decrement('rank');
+                }
+                // Decrement ranks if the new rank is lower than the current rank
+                else {
+                    Student::where('rank', '>=', $newRank)
+                        ->where('rank', '<', $currentRank)
+                        ->increment('rank');
+                }
+                $student->update(['rank' => $newRank]);
+            }
         }
 
         return response()->json([
             'success' => true,
         ]);
     }
+
+
+
+
+
 
 
 
@@ -96,11 +114,11 @@ class StudentController extends Controller
             'role' => 0,
         ]);
 
-        $existingStudentCount = Student::count();
+        $highestRank = Student::max('rank');
 
-        // Create new student with rank 0
+// Create a new student with rank one higher than the highest rank
         $student = new Student([
-            'rank' => $existingStudentCount + 1,
+            'rank' => $highestRank + 1,
         ]);
 
         // Save the student record and associate it with the user
