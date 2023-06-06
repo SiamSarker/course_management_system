@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\Student;
 use App\Models\Course;
 use App\Models\User;
+use App\Services\StudentService;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +18,38 @@ use Illuminate\Support\Str;
 
 class StudentController extends Controller
 {
+
+    private $studentService;
+
+    public function __construct(StudentService $studentService)
+    {
+        $this->studentService = $studentService;
+    }
+
+    public function index()
+    {
+        $students = $this->studentService->getAllStudents();
+
+//        dd($students);
+
+        return view('students.index', compact('students'));
+    }
+
+//    public function index()
+//    {
+//        $students = User::where('role', 0)
+//            ->where('verified_student', 1)
+//            ->get()
+//            ->sortBy(function ($user) {
+//                return optional($user->student)->rank;
+//            });
+//
+//        return view('students.index')->with('students', $students);
+//    }
+
+
+
+
 
 
     public function sendVerificationEmail(User $user)
@@ -50,17 +83,7 @@ class StudentController extends Controller
 
 
 
-    public function index()
-    {
-        $students = User::where('role', 0)
-            ->where('verified_student', 1)
-            ->get()
-            ->sortBy(function ($user) {
-                return optional($user->student)->rank;
-            });
 
-        return view('students.index')->with('students', $students);
-    }
 
 
 
@@ -115,13 +138,6 @@ class StudentController extends Controller
             'success' => true,
         ]);
     }
-
-
-
-
-
-
-
 
 
 
