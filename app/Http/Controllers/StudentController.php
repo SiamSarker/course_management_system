@@ -28,8 +28,6 @@ class StudentController extends Controller
         $user->verification_token = $verificationToken;
         $user->save();
 
-//        dd($user);
-
         // Send the verification email
         Mail::to($user->email)->send(new StudentVerificationMail($user));
 
@@ -39,13 +37,18 @@ class StudentController extends Controller
     {
         $user = User::where('verification_token', $token)->firstOrFail();
 
+        return view('students.activate')->with('user', $user);
+    }
 
+    public function updateActivation(Request $request, User $user)
+    {
         $user->verified_student = true;
         $user->save();
 
-
-        return redirect()->route('students.index')->with('success', 'Your student account has been verified successfully.');
+        return redirect()->route('students.index')->with('success', 'Your student account has been activated successfully.');
     }
+
+
 
     public function index()
     {
