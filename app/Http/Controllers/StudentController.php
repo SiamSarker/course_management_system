@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Exceptions\StudentServiceException;
 use App\Models\Student;
 use App\Models\Course;
 use App\Models\User;
@@ -26,28 +27,65 @@ class StudentController extends Controller
         $this->studentService = $studentService;
     }
 
-    public function index()
+    public function index(StudentService $studentService)
     {
-        $students = $this->studentService->getAllStudents();
-
-//        dd($students);
-
-        return view('students.index', compact('students'));
+        try {
+            $students = $studentService->getAllStudents();
+            return view('students.index')->with('students', $students);
+        } catch (StudentServiceException $e) {
+            return view('students.error')->with('error', $e->getMessage());
+        }
     }
 
-//    public function index()
-//    {
-//        $students = User::where('role', 0)
-//            ->where('verified_student', 1)
-//            ->get()
-//            ->sortBy(function ($user) {
-//                return optional($user->student)->rank;
-//            });
-//
-//        return view('students.index')->with('students', $students);
-//    }
 
 
+
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required|email|unique:users',
+            'password' => 'required',
+            'courses' => 'required|array',
+            'courses.*' => 'exists:courses,id',
+        ]);
+
+        // Check if email already exists
+        $existingUser = User::where('email', $request->email)->first();
+        if ($existingUser) {
+            return redirect()->back()->with('error', 'The email already exists.');
+        }
+
+        // Create new user
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 0,
+        ]);
+
+        $highestRank = Student::max('rank');
+
+// Create a new student with rank one higher than the highest rank
+        $student = new Student([
+            'rank' => $highestRank + 1,
+        ]);
+
+        // Save the student record and associate it with the user
+        $user->student()->save($student);
+
+        // Attach courses to the student
+        $student->courses()->attach($request->courses);
+
+        // Attach courses to the user
+        $user->courses()->attach($request->courses);
+
+        $this->sendVerificationEmail($user);
+
+        return redirect()->route('students.index')->with('success', 'Student created successfully. An email has been sent for verification.');
+
+    }
 
 
 
@@ -148,51 +186,7 @@ class StudentController extends Controller
     }
 
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required',
-            'courses' => 'required|array',
-            'courses.*' => 'exists:courses,id',
-        ]);
 
-        // Check if email already exists
-        $existingUser = User::where('email', $request->email)->first();
-        if ($existingUser) {
-            return redirect()->back()->with('error', 'The email already exists.');
-        }
-
-        // Create new user
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => 0,
-        ]);
-
-        $highestRank = Student::max('rank');
-
-// Create a new student with rank one higher than the highest rank
-        $student = new Student([
-            'rank' => $highestRank + 1,
-        ]);
-
-        // Save the student record and associate it with the user
-        $user->student()->save($student);
-
-        // Attach courses to the student
-        $student->courses()->attach($request->courses);
-
-        // Attach courses to the user
-        $user->courses()->attach($request->courses);
-
-        $this->sendVerificationEmail($user);
-
-        return redirect()->route('students.index')->with('success', 'Student created successfully. An email has been sent for verification.');
-
-    }
 
 
 
