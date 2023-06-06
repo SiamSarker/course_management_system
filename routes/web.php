@@ -43,7 +43,7 @@ Route::prefix('students')->middleware(['auth', 'isAdmin'])->group(function() {
     Route::put('/{student}', [StudentController::class, 'update'])->name('students.update');
     Route::delete('/{student}', [StudentController::class, 'destroy'])->name('students.destroy');
     Route::put('/{student}/update-rank', [StudentController::class, 'updateRank'])->name('students.updateRank');
-    Route::get('/table-data', [StudentController::class, 'getTableData'])->name('students.tableData');
+//    Route::get('/table-data', [StudentController::class, 'getTableData'])->name('students.tableData');
 });
 
 
