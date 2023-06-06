@@ -9,18 +9,57 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
+use App\Mail\StudentVerificationMail;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+
+
 
 class StudentController extends Controller
 {
-    public function index()
-    {
-        $students = User::where('role', 0)->with(['student' => function ($query) {
-            $query->orderBy('students.rank', 'asc');
-        }])->get();
 
-        return view('students.index')->with('students', $students);
+
+    public function sendVerificationEmail(User $user)
+    {
+        $verificationToken = Str::random(40); // Generate a verification token
+
+
+        // Save the verification token to the user's record
+        $user->verification_token = $verificationToken;
+        $user->save();
+
+//        dd($user);
+
+        // Send the verification email
+        Mail::to($user->email)->send(new StudentVerificationMail($user));
 
     }
+
+    public function verify($token)
+    {
+        $user = User::where('verification_token', $token)->firstOrFail();
+
+
+        $user->verified_student = true;
+        $user->save();
+
+
+        return redirect()->route('students.index')->with('success', 'Your student account has been verified successfully.');
+    }
+
+    public function index()
+    {
+        $students = User::where('role', 0)
+            ->where('verified_student', 1)
+            ->get()
+            ->sortBy(function ($user) {
+                return optional($user->student)->rank;
+            });
+
+        return view('students.index')->with('students', $students);
+    }
+
+
 
     public function getTableData()
     {
@@ -130,7 +169,10 @@ class StudentController extends Controller
         // Attach courses to the user
         $user->courses()->attach($request->courses);
 
-        return redirect()->route('students.index')->with('success', 'Student created successfully.');
+        $this->sendVerificationEmail($user);
+
+        return redirect()->route('students.index')->with('success', 'Student created successfully. An email has been sent for verification.');
+
     }
 
 

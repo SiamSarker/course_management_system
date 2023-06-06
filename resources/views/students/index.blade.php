@@ -17,12 +17,7 @@
             </tr>
             </thead>
             <tbody>
-            @php
-                $sortedStudents = $students->sortBy(function ($student) {
-                    return optional($student->student)->rank;
-                });
-            @endphp
-            @foreach ($sortedStudents as $student)
+            @foreach ($students as $student)
                 <tr>
                     <td>{{ $student->name }}</td>
                     <td>{{ $student->email }}</td>

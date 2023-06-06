@@ -50,6 +50,10 @@ Route::put('/students/{student}/update-rank', [StudentController::class, 'update
 Route::get('students/table-data', [StudentController::class, 'getTableData'])->name('students.tableData');
 
 
+Route::get('/students/verify/{token}', [StudentController::class, 'verify'])->name('students.verify');
+
+
+
 Route::get('/students2', [StudentController::class, 'index2'])->name('students');
 
 // Teacher routes
